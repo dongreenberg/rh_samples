@@ -34,8 +34,8 @@ if __name__ == "__main__":
                                        torch_dtype=torch.bfloat16,
                                        device_map='auto').get_or_to(gpu, env=env, name="llama-13b-model")
 
-    test_prompt = "Tell me about unified development interfaces into compute and data infrastructure."
-    test_output = remote_hf_chat_model.predict(test_prompt, temperature=0.7, max_new_tokens=40, repetition_penalty=1.0)
+    test_prompt = "Why do Machine Learning Engineers let their infra push them around?"
+    test_output = remote_hf_chat_model.predict(test_prompt, temperature=0.7, max_new_tokens=1000, repetition_penalty=1.0)
 
     print("\n\n... Test Output ...\n")
     print(test_output)
