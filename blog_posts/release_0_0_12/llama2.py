@@ -22,10 +22,11 @@ class HFChatModel(rh.Module):
 
 
 if __name__ == "__main__":
-    gpu = rh.cluster(name="rh-a10x", instance_type="A10G:1")
+    gpu = rh.cluster(name="rh-a10x", instance_type="A10G:1").save()
     env = rh.env(reqs=["torch", "transformers==4.31.0", "accelerate==0.21.0", "bitsandbytes==0.40.2",
-                       "safetensors>=0.3.1", "scipy"], name="llama2inference", working_dir="./")
-    gpu.sync_secrets(["huggingface"])  # Needed to use Llama2 because it's a gated model
+                       "safetensors>=0.3.1", "scipy"],
+                 secrets=["huggingface"],  # Needed to download Llama2
+                 name="llama2inference", working_dir="./")
 
     remote_hf_chat_model = HFChatModel(model_id="meta-llama/Llama-2-13b-chat-hf",
                                        load_in_4bit=True,
