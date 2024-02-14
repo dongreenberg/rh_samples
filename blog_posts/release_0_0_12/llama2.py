@@ -22,7 +22,7 @@ class HFChatModel(rh.Module):
 
 
 if __name__ == "__main__":
-    gpu = rh.cluster(name="rh-a10x", instance_type="A10G:1").save()
+    gpu = rh.cluster(name="rh-a10x", instance_type="A10G:1")
     env = rh.env(reqs=["torch", "transformers==4.31.0", "accelerate==0.21.0", "bitsandbytes==0.40.2",
                        "safetensors>=0.3.1", "scipy"],
                  secrets=["huggingface"],  # Needed to download Llama2
