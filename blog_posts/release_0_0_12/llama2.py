@@ -13,28 +13,26 @@ class HFChatModel(rh.Module):
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_id, clean_up_tokenization_spaces=True)
         self.model = AutoModelForCausalLM.from_pretrained(self.model_id, **self.model_kwargs)
 
-    def predict(self, prompt, stream=True, **inf_kwargs):
+    def predict(self, prompt, **inf_kwargs):
         if not self.model:
             self.load_model()
         inputs = self.tokenizer(prompt, return_tensors="pt").to("cuda")
-        generated_ids = self.model.generate(**inputs,
-                                            streamer=TextStreamer(self.tokenizer) if stream else None,
-                                            **inf_kwargs)
+        generated_ids = self.model.generate(**inputs, **inf_kwargs, streamer=TextStreamer(self.tokenizer))
         return self.tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
 
 
 if __name__ == "__main__":
     gpu = rh.cluster(name="rh-a10x", instance_type="A10G:1")
-    env = rh.env(reqs=["transformers==4.31.0", "accelerate==0.21.0", "bitsandbytes==0.40.2", "safetensors>=0.3.1", "scipy"],
-                 name="llama2inference", working_dir="./")
+    env = rh.env(reqs=["torch", "transformers==4.31.0", "accelerate==0.21.0", "bitsandbytes==0.40.2",
+                       "safetensors>=0.3.1", "scipy"], name="llama2inference", working_dir="./")
     gpu.sync_secrets(["huggingface"])  # Needed to use Llama2 because it's a gated model
 
     remote_hf_chat_model = HFChatModel(model_id="meta-llama/Llama-2-13b-chat-hf",
-                                       load_in_8bit=True,
+                                       load_in_4bit=True,
                                        torch_dtype=torch.bfloat16,
                                        device_map='auto').get_or_to(gpu, env=env, name="llama-13b-model")
 
-    test_prompt = "Why do Machine Learning Engineers let their infra push them around?"
+    test_prompt = "What's the fastest way to deploy and share my AI app?"
     test_output = remote_hf_chat_model.predict(test_prompt, temperature=0.7, max_new_tokens=1000, repetition_penalty=1.0)
 
     print("\n\n... Test Output ...\n")
