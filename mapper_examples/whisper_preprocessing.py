@@ -26,7 +26,6 @@ class WhisperPreprocessor(rh.Module):
 
 if __name__ == "__main__":
     cluster = rh.cluster(name="rh-4x8-cpu", instance_type="CPU:8", num_instances=4)
-    cluster.restart_server(restart_ray=True)
     audio_preproc_env = rh.env(working_dir="reqs:./mapper_examples", name="audio_preproc", compute={"CPU": 1})
     remote_preproc = WhisperPreprocessor().to(cluster, env=audio_preproc_env, name="whisper_preproc")
 
